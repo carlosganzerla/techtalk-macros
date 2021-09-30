@@ -1,12 +1,14 @@
 ;; Quote
 
-(1 x 3 y) ; Error
+;; Error: 
+; (1 x z 3 y)
 '(1 x 3 y) ; Valid: atoms are not evaluated.
 (quote (1 x 3 y))
+
 ;; Backquote, comma, and comma-at
 
 `(cons ,(+ 1 3) x)
-`(progn ,@(list (print 1) (print 2) (print 3)))
+`(progn ,@(list '(print 1) '(print 2) '(print 3)))
 
 ;; Classical operators
 

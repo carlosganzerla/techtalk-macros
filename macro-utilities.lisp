@@ -14,8 +14,8 @@
   (if (integerp n)
       (nth n exprs)
       `(case ,n
-       ,@(let ((i -1))
-           (mapcar #'(lambda(x) `(,(incf i) ,x)) exprs)))))
+         ,@(let ((i -1))
+             (mapcar #'(lambda(x) `(,(incf i) ,x)) exprs)))))
 
 (nth-expr 2 (print 1) (print 2) (print 3))
 
@@ -26,12 +26,17 @@
 (defmacro ntimes (n &body body)
   "This macro will execute the BODY N times"
   (with-gensyms (times rec-fun)
-    `(let ((,times ,n))
-       (labels ((,rec-fun (n)
-                  (when (> n 0)
-                    ,@body
-                    (,rec-fun (- n 1)))))
-         (,rec-fun ,times)))))
+                `(let ((,times ,n))
+                   (labels ((,rec-fun (n)
+                              (when (> n 0)
+                                ,@body
+                                (,rec-fun (- n 1)))))
+                     (,rec-fun ,times)))))
+
+(let ((x 3))
+  (ntimes 6
+          (incf x)
+          (format t "Incrementing ~A! ~A is now ~A~%" 'x 'x x)))
 
 
 ;; Preserve original values
@@ -42,12 +47,12 @@
 
 (let ((i 3) (j 5))
   (retain (i j) 
-    (print i)
-    (setf i 32)
-    (print i)
-    (print j)
-    (setf j -3)
-    (print j))
+          (print i)
+          (setf i 32)
+          (print i)
+          (print j)
+          (setf j -3)
+          (print j))
   (print i)
   (print j)
   nil)
@@ -56,8 +61,8 @@
 (defmacro my-double (x)
   "Doubles the value of X"
   (with-gensyms (val)
-    `(let ((,val ,x))
-       (setf ,val (* ,val 2)))))
+                `(let ((,val ,x))
+                   (setf ,val (* ,val 2)))))
 
 (let ((x 1) (y 3) (lst (list 3 2 3 4)))
   (my-double x)

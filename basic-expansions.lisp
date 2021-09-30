@@ -1,52 +1,50 @@
 ;;; Built-in macros
 
-(or (+ 1 2) 1 :keyword 'e (print "carlo"))
-
 (and (+ 1 2) :keyword 'e (print "carlo"))
-
-(dolist (e (list 5 4 3 2 1))
-  (print e))
 
 (let ((x 3))
   (unless x
     (format t "~A is falsy~%" 'x)))
 
+(or (+ 1 2) 1 :keyword 'e (print "carlo"))
 
+(dolist (e (list 5 4 3 2 1))
+  (print e))
 
-;;; Creating our own macros
-(defmacro my-if (condition if-form else-form)
-  `(cond (,condition ,if-form)
-         (t ,else-form)))
+;; I want to port JS falsy stuff to lisp: How to do it?
+(defun is-js-truthy (val)
+  (not (or (not val)
+           (eql "" val)
+           (eql 0 val))))
+
+;; If we didn't have macros, a good way to do it is a HOF
+(defun js-if-fn (condition if-fn &optional (else-fn (lambda () nil)))
+  (if (is-js-truthy condition)
+      (funcall if-fn)
+      (funcall else-fn)))
+
+;; Unfortunately, it kinda sucks having to keep wrapping stuff on functions
+(js-if-fn (print 1)
+          (lambda () (print "aint 0"))
+          (lambda () 'zero))
+
+(js-if-fn (print 0)
+          (lambda () (print "aint 0"))
+          (lambda () 'zero))
+
 
 ;; Tip to macro design: picture the expansion
-(or (and 1 2)
-    (and 1 3)
-    (and 1 4)
-    (and 2 3)
-    (and 2 4)
-    (and 3 4))
+;; Here we are extending the syntax in terms of a known function:
+(defmacro js-if (condition if-form else-form)
+  `(if (is-js-truthy ,condition)
+      ,if-form
+      ,else-form))
 
-(defun combine-2 (lst fn)
-  (let ((result nil))
-    (do* ((iter lst (cdr iter))
-          (head (car lst) (car iter)))
-      ((not iter) (nreverse result))
-      (dolist (i (cdr iter))
-        (setf result (cons (funcall fn head i) result))))))
 
-(defmacro at-least-2 (form1 form2 &rest forms)
-  (let ((lst (append (list form1 form2) forms)))
-    `(or ,@(combine-2 lst (lambda (e1 e2)
-                            `(and ,e1 ,e2))))))
+(js-if (print 1)
+       (print "aint 0")
+       'zero)
 
-(defun at-least-2-fn (form1 form2 &rest forms)
-  (let ((lst (append (list form1 form2) forms)))
-    (some #'identity (combine-2 lst (lambda (e1 e2)
-                                      (and e1 e2))))))
-
-(let ((x 999))
- (at-least-2 1 x 3 (print "hello good old friend!")))
-
-(at-least-2 1 nil nil (print "hello good old friend!"))
-
-(at-least-2-fn 1 2 3 (print "hello good old friend!"))
+(js-if (print 0)
+       (print "aint 0")
+       'zero)

@@ -3,7 +3,7 @@
 ;;; Atoms
 1
 3
-key
+;; Error on evaluating just this: key
 :key
 
 (defparameter *foo* "im a variable")
@@ -29,28 +29,10 @@ key
 (list 1 2 3 (list 3 4 5 6))
 
 ;;; Functions
-(defun print-dots-rec (x)
-  (if (> x 0)
-      (progn
-        (format t ".")
-        (print-dots-rec (- x 1)))
-      nil))
+(defun say-hi (name)
+  (format t "HI ~A~%" name))
 
 (defun print-dots-iter (len)
   (do ((i 0 (+ i 1)))
-      ((>= i len) nil)
+      ((>= i len) len)
       (format t ".")))
-
-(defun ocurrences-rec (lst sym count)
-  (if (null lst)
-      count
-      (ocurrences-rec (cdr lst) sym (if (eql (car lst) sym)
-                                        (+ count 1)
-                                        count))))
-(defun occurrences-iter (lst sym)
-  (let ((cnt 0))
-    (dolist (e lst)
-      (if (eql e sym)
-          (setf cnt (+ cnt 1))
-          nil))
-    cnt))
